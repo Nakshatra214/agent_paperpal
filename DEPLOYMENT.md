@@ -17,11 +17,11 @@ This guide covers deploying the **Agent Paperpal** application to production usi
 | `GOOGLE_API_KEY` | Optional | **Yes** | — | Alias for LiteLLM (automatically mapped from `GEMINI_API_KEY` if omitted). |
 | `CORS_ORIGINS` | **Yes** (Prod) | No | `http://localhost:5173,http://localhost:3000` | Comma-separated list of allowed origins (e.g. `https://your-frontend.vercel.app,http://localhost:5173`). |
 | `PORT` | Auto (Render) | No | `8000` | Injected automatically by Render. Application binds dynamically to `${PORT:-8000}`. |
-| `GEMINI_MODEL` | Optional | No | `gemini-2.5-flash` | Gemini model for CrewAI pipeline and rule extraction. |
+| `GEMINI_MODEL` | Optional | No | `gemini-3.6-flash` | Gemini model for CrewAI pipeline and rule extraction. |
 | `GEMINI_MAX_TOKENS` | Optional | No | `65536` | Max tokens per LLM completion (handles large manuscript JSON). |
-| `GEMINI_THINKING_BUDGET` | Optional | No | `16384` | Thinking token budget for Gemini 2.5 Flash reasoning. |
+| `GEMINI_THINKING_BUDGET` | Optional | No | `2048` | Thinking token budget (minimal reasoning effort to control token consumption; 0 disables). |
 | `LLM_TIMEOUT` | Optional | No | `300` | Per-call timeout in seconds for agent calls. |
-| `LLM_MAX_RETRIES` | Optional | No | `3` | Maximum retry attempts for failed LLM calls. |
+| `LLM_MAX_RETRIES` | Optional | No | `2` | Maximum retry attempts for failed LLM calls. |
 
 ### Frontend (Vercel & Local `.env`)
 
@@ -115,11 +115,11 @@ The project includes both a `render.yaml` blueprint and a production-ready `back
 4. Add Environment Variables under the **Environment** tab:
    - `GEMINI_API_KEY` = `YOUR_GEMINI_API_KEY` (Mark as Secret)
    - `CORS_ORIGINS` = `https://your-frontend.vercel.app,http://localhost:5173`
-   - `GEMINI_MODEL` = `gemini-2.5-flash`
+   - `GEMINI_MODEL` = `gemini-3.6-flash`
    - `GEMINI_MAX_TOKENS` = `65536`
-   - `GEMINI_THINKING_BUDGET` = `16384`
+   - `GEMINI_THINKING_BUDGET` = `2048`
    - `LLM_TIMEOUT` = `300`
-   - `LLM_MAX_RETRIES` = `3`
+   - `LLM_MAX_RETRIES` = `2`
 5. Click **Deploy Web Service**.
 6. Once deployed, copy your Render service URL (e.g., `https://ppal-backend.onrender.com`).
 

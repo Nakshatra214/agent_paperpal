@@ -437,7 +437,7 @@ Journal Author Guidelines:
 """
 
 
-def extract_rules_llm(guidelines_text: str, max_retries: int = 3) -> dict:
+def extract_rules_llm(guidelines_text: str, max_retries: int = 2) -> dict:
     """
     Call Gemini to extract formatting rules from guideline text.
 
@@ -456,7 +456,12 @@ def extract_rules_llm(guidelines_text: str, max_retries: int = 3) -> dict:
         )
 
     genai.configure(api_key=api_key)
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+    raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+    model_name = raw_model
+    if model_name.startswith("gemini/"):
+        model_name = model_name[len("gemini/"):]
+    if model_name.startswith("models/"):
+        model_name = model_name[len("models/"):]
 
     # Truncate to avoid token limits — first 12 000 chars is plenty for rules
     truncated = guidelines_text[:12_000]
@@ -550,7 +555,12 @@ def convert_prompt_to_overrides(prompt: str, max_retries: int = 2) -> dict:
         return {}
 
     genai.configure(api_key=api_key)
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+    raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+    model_name = raw_model
+    if model_name.startswith("gemini/"):
+        model_name = model_name[len("gemini/"):]
+    if model_name.startswith("models/"):
+        model_name = model_name[len("models/"):]
     
     for attempt in range(1, max_retries + 1):
         try:

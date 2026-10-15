@@ -46,8 +46,8 @@ import litellm
 litellm.max_tokens = int(os.getenv("GEMINI_MAX_TOKENS", "65536"))
 # Set global litellm request timeout so httpx doesn't use its own (low) default.
 litellm.request_timeout = int(os.getenv("LLM_TIMEOUT", "300"))
-# Retry on transient failures (429, 500, timeout)
-litellm.num_retries = int(os.getenv("LLM_MAX_RETRIES", "3"))
+# Retry on transient failures (429, 500, timeout) — 2 retries prevents token exhaustion
+litellm.num_retries = int(os.getenv("LLM_MAX_RETRIES", "2"))
 
 logger = get_logger(__name__)
 
@@ -838,24 +838,36 @@ def run_pipeline(paper_content: str, journal_style: str, source_docx_path: Optio
     os.environ["GEMINI_API_KEY"] = gemini_key
     os.environ["GOOGLE_API_KEY"] = gemini_key
 
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+    clean_model_name = raw_model
+    if clean_model_name.startswith("gemini/"):
+        clean_model_name = clean_model_name[len("gemini/"):]
+    if clean_model_name.startswith("models/"):
+        clean_model_name = clean_model_name[len("models/"):]
+
     llm_timeout = int(os.getenv("LLM_TIMEOUT", "300"))
 
-    # Gemini 2.5 Flash "thinking" tokens share the max_tokens budget.
-    # Without a cap, thinking can consume the entire budget → empty response.
-    # Budget split: ~16k thinking + ~49k output = 65536 total.
+    # Gemini 3.6 Flash reasoning controls:
+    # Set minimal thinking budget (default 2048) to prevent runaway token consumption.
+    # If thinking_budget <= 0, thinking is disabled.
     max_tokens = int(os.getenv("GEMINI_MAX_TOKENS", "65536"))
-    thinking_budget = int(os.getenv("GEMINI_THINKING_BUDGET", "16384"))
-    llm = LLM(
-        model=f"gemini/{model_name}",
-        timeout=llm_timeout,
-        temperature=0,
-        max_tokens=max_tokens,
-        thinking={"type": "enabled", "budget_tokens": thinking_budget},
-    )
+    thinking_budget = int(os.getenv("GEMINI_THINKING_BUDGET", "2048"))
+
+    llm_params = {
+        "model": f"gemini/{clean_model_name}",
+        "timeout": llm_timeout,
+        "temperature": 0,
+        "max_tokens": max_tokens,
+    }
+    if thinking_budget > 0:
+        llm_params["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+    else:
+        llm_params["thinking"] = {"type": "disabled"}
+
+    llm = LLM(**llm_params)
     logger.info(
-        "[PIPELINE] LLM = %s (max_tokens=%d, thinking_budget=%d)",
-        model_name, max_tokens, thinking_budget,
+        "[PIPELINE] LLM = gemini/%s (raw GEMINI_MODEL=%s, max_tokens=%d, thinking_budget=%d)",
+        clean_model_name, raw_model, max_tokens, thinking_budget,
     )
 
     if rules_override:

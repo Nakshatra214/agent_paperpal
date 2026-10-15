@@ -8,7 +8,8 @@ genai.configure(
     api_key=os.environ.get("GEMINI_API_KEY"),
 )
 
-model = genai.GenerativeModel("gemini-3.1-flash-lite-preview")
+model_name = os.getenv("GEMINI_MODEL", "gemini-3.6-flash").replace("gemini/", "").replace("models/", "")
+model = genai.GenerativeModel(model_name)
 
 response = model.generate_content(
     "Explain IEEE citation format."

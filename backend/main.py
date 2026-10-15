@@ -278,6 +278,13 @@ async def startup_event() -> None:
     logger.info("Supported journals: %s", get_supported_journals())
     logger.info("Upload dir:  %s", UPLOADS_DIR.resolve())
     logger.info("Output dir:  %s", OUTPUTS_DIR.resolve())
+    raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+    clean_model = raw_model
+    if clean_model.startswith("gemini/"):
+        clean_model = clean_model[len("gemini/"):]
+    if clean_model.startswith("models/"):
+        clean_model = clean_model[len("models/"):]
+    logger.info("Active LLM model: gemini/%s (GEMINI_MODEL=%s)", clean_model, raw_model)
     if not os.getenv("GEMINI_API_KEY") and not os.getenv("GOOGLE_API_KEY"):
         logger.error("GEMINI_API_KEY not set in environment! LLM calls will fail.")
     else:
@@ -582,6 +589,13 @@ async def health() -> dict:
     except Exception:
         crewai_version = "unknown"
 
+    raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+    clean_model = raw_model
+    if clean_model.startswith("gemini/"):
+        clean_model = clean_model[len("gemini/"):]
+    if clean_model.startswith("models/"):
+        clean_model = clean_model[len("models/"):]
+
     logger.info("[HEALTH] GET /health — status=%s", status)
     return {
         "status": status,
@@ -593,6 +607,7 @@ async def health() -> dict:
         "system_info": {
             "python_version": sys.version.split()[0],
             "crewai_version": crewai_version,
+            "configured_model": f"gemini/{clean_model}",
             "api_uptime_seconds": round(time.time() - _API_START_TIME, 1),
         },
         "diagnostics": {
@@ -1814,7 +1829,13 @@ async def extract_rules_from_guidelines(
             })
 
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite"))
+        raw_model = (os.getenv("GEMINI_MODEL", "gemini-3.6-flash") or "gemini-3.6-flash").strip()
+        clean_model = raw_model
+        if clean_model.startswith("gemini/"):
+            clean_model = clean_model[len("gemini/"):]
+        if clean_model.startswith("models/"):
+            clean_model = clean_model[len("models/"):]
+        model = genai.GenerativeModel(clean_model)
 
         # Truncate very long guidelines to avoid token limits
         max_chars = 30000

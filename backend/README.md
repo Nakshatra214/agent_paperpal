@@ -585,7 +585,7 @@ cp .env.example .env
 |----------|----------|---------|-------------|
 | `GEMINI_API_KEY` | Yes | — | Google Gemini API key |
 | `GOOGLE_API_KEY` | Yes | — | Same key (LiteLLM reads this alias) |
-| `GEMINI_MODEL` | No | `gemini-2.5-flash` | Gemini model identifier |
+| `GEMINI_MODEL` | No | `gemini-3.6-flash` | Gemini model identifier |
 | `GEMINI_MAX_TOKENS` | No | `65536` | Max tokens per LLM call |
 | `CORS_ORIGINS` | No | `http://localhost:5173,http://localhost:3000` | Comma-separated allowed CORS origins |
 | `BACKEND_HOST` | No | `0.0.0.0` | Uvicorn bind host |
