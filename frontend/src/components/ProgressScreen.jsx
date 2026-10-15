@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import axios from 'axios'
 
-const API = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+const API = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000').replace(/\/+$/, '')
 
 const STEPS = [
   { label: 'Parsing & extracting structure', sublabel: 'Reading and analyzing your document' },

@@ -832,7 +832,11 @@ def run_pipeline(paper_content: str, journal_style: str, source_docx_path: Optio
     pipeline_start = time.time()
 
     # LiteLLM (used internally by CrewAI) reads GOOGLE_API_KEY for Google AI Studio
-    os.environ["GOOGLE_API_KEY"] = os.environ["GEMINI_API_KEY"]
+    gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    if not gemini_key:
+        raise RuntimeError("GEMINI_API_KEY or GOOGLE_API_KEY is not set in environment.")
+    os.environ["GEMINI_API_KEY"] = gemini_key
+    os.environ["GOOGLE_API_KEY"] = gemini_key
 
     model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     llm_timeout = int(os.getenv("LLM_TIMEOUT", "300"))

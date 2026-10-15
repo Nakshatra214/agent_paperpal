@@ -12,9 +12,16 @@ venv/
 env/
 
 # Environment
-backend/.env
-frontend/.env
 .env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+*.local
 
 # Service account credentials
 **/service-account*.json

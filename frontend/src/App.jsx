@@ -13,7 +13,7 @@ if (typeof window !== 'undefined') {
 }
 
 // --- Configuration ---
-const VITE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL
+const VITE_BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || '').replace(/\/+$/, '')
 const API = VITE_BACKEND_URL || 'http://localhost:8000'
 
 if (!VITE_BACKEND_URL && typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
